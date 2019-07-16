@@ -1,0 +1,430 @@
+\documentclass{beamer}
+\beamertemplatenavigationsymbolsempty
+
+\definecolor{fore}{RGB}{249,242,215}
+\definecolor{back}{RGB}{51,51,51}
+\definecolor{title}{RGB}{255,0,90}
+
+\setbeamercolor{titlelike}{fg=title}
+\setbeamercolor{normal text}{fg=fore,bg=back}
+\setbeamercolor{structure}{fg=title}
+
+\usepackage{pstricks, pst-node}
+\usepackage{listings, graphicx, tikz, pst-sigsys}
+\usepackage[no-math]{fontspec}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+\usepackage{mathtools}
+
+\newcommand\myeq{\stackrel{\mathclap{\normalfont\mbox{$L^2$}}}{\rightarrow}}
+
+%\usepackage[german]{babel}
+
+%\usepackage{bera}
+%\usepackage[scaled]{beraserif}
+\setmainfont{Bitstream Vera Serif}
+\setsansfont{Bitstream Vera Sans}
+\setmonofont{Bitstream Vera Sans Mono}
+
+\definecolor{keywords}{RGB}{255,0,90}
+\definecolor{comments}{RGB}{60,179,113}
+\lstset{language=Python,
+keywordstyle=\color{keywords},
+commentstyle=\color{comments}\emph}
+
+
+
+
+\begin{document}
+\begin{frame}[fragile]
+\frametitle{the s  l  o  w fourier transform algorithm}
+\begin{center}
+\includegraphics[width = 0.5\textwidth]{wmbrmax.jpg}
+\end{center}
+\textcolor{title}{\begin{flushright} a silly talk about the einstein-wiener-khinchin theorem \end{flushright}}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{the s  l  o  w fourier transform algorithm}
+\begin{center}
+\includegraphics[width = 0.5\textwidth]{IMG_2979.JPG}
+\end{center}
+\textcolor{title}{\begin{flushright} a silly talk about the einstein-wiener-khinchin theorem \end{flushright}}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{the s  l  o  w fourier transform algorithm}
+\begin{center}
+\includegraphics[width = 0.5\textwidth]{IMG_3026.JPG}
+\end{center}
+\textcolor{title}{\begin{flushright} a silly talk about the einstein-wiener-khinchin theorem \end{flushright}}
+\end{frame}
+
+
+
+
+\begin{frame}
+	\frametitle{random signals (trigger warning: american-style presentation)}
+	\begin{itemize}%[label=\textcolor{red}{\textbullet}]
+		\item A \textit{random signal} is a function that maps each outcome of a probabilistic experiment to a real signal among an ensemble of signals.
+		\item Permit me to call an \emph{entire} random signal $X(t)$ if continuous, $X[n]$ if discrete. Sometimes I will more sensibly call it $X(\cdot), X[\cdot]$, or simply $X$.
+		\item A signal's value at a particular time $t_i$ (or $n_i$) can be seen as a real random variable---call it $X(t_i)$ (or $X[n_i]$)---taking its value according to the distribution of values among the ensembles' signals at $t_i$ (or $n_i$).
+		\item At each point in time, we model $X(t_i)$ (or $X[n_i]$) as a continuous random variable with PDF $f_{X(t_i)}(\cdot)$ (or $f_{X[n_i]}(\cdot)$). (For certain random signals, a PMF over a discrete set of signal values at each time is more appropriate.)
+	\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{``you're giving three-card monte a bad name!"}
+	\begin{center}
+	\includegraphics[width = 0.3\textwidth]{threecard.jpg}
+	\end{center}
+    \begin{columns}
+    \begin{column}{.3\textwidth}
+    \centering
+    \begin{tikzpicture}[
+    declare function={
+      excitation(\t,\w) = sin(\t*\w);
+      noise = rnd - 0.5;
+      source(\t) = excitation(\t,20) + noise;
+      filter(\t) = 1 - abs(sin(mod(\t, 50)));
+      speech(\t) = 1 + source(\t)*filter(\t);
+    }
+  ]
+    \clip (-2.5,-2) rectangle (5,4);
+    \draw[orange, thick, x=0.0085cm, y=.5cm] (0,1) -- plot [domain=0:360, samples=144, smooth] (\x,{speech(\x)});
+    \draw[densely dotted, thick] (0,1.2) -- (0,1.7);
+    \draw[orange, thick, x=0.0085cm, y=.5cm,yshift=1.3cm] (0,1) -- plot [domain=0:360, samples=144, smooth] (\x,{speech(\x)});
+    \draw[densely dotted, thick] (0,2.5) -- (0,3.0);
+    \draw[orange, thick, x=0.0085cm, y=.5cm,yshift=2.6cm] (0,1) -- plot [domain=0:360, samples=144, smooth] (\x,{speech(\x)});
+    \draw[white, dashed] (2,-0.4) -- (2,4);
+    \node[inner sep=0pt, rotate=-90] (cup1) at (-0.8,0.6)
+    {\includegraphics[width=.25\textwidth]{redcup.jpg}};
+    \node[inner sep=0pt, rotate=-90] (cup1) at (-0.8,1.8)
+    {\includegraphics[width=.25\textwidth]{redcup.jpg}};
+    \node[inner sep=0pt, rotate=-90] (cup1) at (-0.8,3)
+    {\includegraphics[width=.25\textwidth]{redcup.jpg}};
+    %\node[draw,text width=5cm] at (4.7,-0.4) {random variable $X(t_0)$};
+    \node at (1.2,-1.2) {random variable $X(t_0)$};
+    \node at (2,-0.6) {$t_0$};
+    \node[rotate=90] at (-2, 1.8) {random signal $X(\cdot)$};
+    \node at (3.7, 0.6) {$x_3(\cdot)$};
+    \node at (3.7, 1.8) {$x_2(\cdot)$};
+    \node at (3.7, 3) {$x_1(\cdot)$};
+    \end{tikzpicture}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]
+	\frametitle{first \& second moments of random signals $X$, $Y$}
+	We can consider joint densities of several of these random variables, be they in the same random signal \textcolor{title}{$f_{X(t_1), X(t_2),\ldots,X(t_k)}(x_1, x_2, \ldots, x_k)$} or in different signals \textcolor{title}{$f_{X(t_1), \ldots, X(t_k), Y(t_1'),\ldots,Y(t_l')}(x_1, \ldots, x_k, y_1, \ldots y_l)$}.
+	\begin{itemize}
+		\item \emph{Mean:} $\mu_{X}(t_i) = \mathbb{E}[X(t_i)]$,
+		\item \emph{Autocorrelation:} $R_{XX}(t_i,t_j) = \mathbb{E}[X(t_i)X(t_j)]$,
+		\item \emph{Autocovariance:} \begin{align*} C_{XX}(t_i,t_j) &= \mathbb{E}[(X(t_i)-\mu_X(t_i))(X(t_j)-\mu_X(t_j))]\\ &= R_{XX}(t_i,t_j)-\mu_X(t_i)\mu_X(t_j)\end{align*}
+			\item \emph{Cross-correlation:} $R_{XY}(t_i,t_j) = \mathbb{E}[X(t_i)Y(t_j)]$
+		\item \emph{Cross-covariance:}\begin{align*} C_{XY}(t_i,t_j) &= \mathbb{E}[(X(t_i)-\mu_X(t_i))(Y(t_j)-\mu_Y(t_j))]\\ &= R_{XY}(t_i,t_j)-\mu_X(t_i)\mu_Y(t_j)\end{align*}
+
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{model simplification}
+	%\vspace{-2cm}
+	\begin{columns}[T]
+	\begin{column}{0.6\textwidth}
+        	We don't have time to find a spoon, let alone to specify the joint PDF for every possible combination of samples $X(t_1),\ldots,X(t_k)$ and $Y(t_1'),\ldots,Y(t_l')$.
+	\end{column}
+	\begin{column}{0.3\textwidth}
+		\vspace{-1.4cm}
+		\begin{figure}
+		\hfil\begin{minipage}{\textwidth}\centering
+			\includegraphics[height=0.25\textheight]{gogurt.jpg}
+  			\caption{\scriptsize Grab-and-Go for Kids on the Move!}
+			\end{minipage}
+		\end{figure}
+	\end{column}
+	\end{columns}
+	We may assume two random signals $X$ and $Y$ are independent:
+	\vspace{-0.2cm}
+	\begin{align*}
+		&f_{X(t_1),\ldots,X(t_k),Y(t_1'),\ldots,Y(t_l')}(x_1,\ldots,x_k,y_1,\ldots,y_l) = \\& f_{X(t_1),\ldots,X(t_k)}(x_1,\ldots,x_k) \cdot f_{Y(t_1'),\ldots,Y(t_l')}(y_1,\ldots,y_l)
+	\end{align*}
+	\vspace{-0.1cm}Now characterizing each random signal is as easy as specifying the PDFs for every possible subset of samples of each signal! 
+	
+	\vspace{0.3cm}
+
+	Natural signals of interest, even those assumed to be uncorrelated noise, exhibit strong intertemporal correlation when observation involves filtering.
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{strict-sense stationarity (sss)}
+	If $X$ is SSS, all joint statistics for $X(t_1), \ldots, X(t_k)$
+depend on the relative values of the sampling instances $t_1, \ldots, t_k$, not on the sampling instances themselves.
+	
+        \begin{center}
+		\begin{figure}
+        \includegraphics[width = 0.5\textwidth]{burns.jpg}
+			\caption{The US Postal Service is not SSS.}
+		\end{figure}
+		\end{center}
+
+			Thus, for arbitrary time shift $\tau$, we have that $f_{X(t_1), \ldots, X(t_k)}(x_1, \ldots, x_k) = f_{X(t_1+\tau),\ldots,X(t_k+\tau)}(x_1, \ldots, x_k)$.
+	%\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{wide-sense stationarity}
+	A random signal $X$ is WSS if its first two moments are stationary:
+	\begin{itemize}
+		\item $\mu_X(t_i) = \mu_X$ for all $t_i$
+		\item $R_{XX}(t_i, t_j) = R_{XX}(t_i+\alpha, t_j+\alpha)$ for all $t_i, t_j, \alpha$. By setting $\alpha = t-t_j$ for arbitrary $t$, we can write $R_{XX}(\tau) =R_{XX}(t+\tau, t) = \mathbb{E}[X(t+\tau)X(t)].$
+		\item It follows that $C_{XX}$ too depends only on the difference $\tau$ of its arguments.
+	\end{itemize}
+
+	Two random signals $X$ and $Y$ are jointly WSS if they are individually WSS and if $R_{XY}(t_i, t_j)$ depends only on the time lag $\tau = t_i-t_j$, ie if we we can write $R_{XY}(\tau) = \mathbb{E}[X(t+\tau)Y(t)].$
+
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{properties of wss signals}
+	\begin{itemize}
+		\item \emph{Symmetry:} \begin{align*} R_{XX}(\tau) = R_{XX}(-\tau),\text{ }& R_{XY}(\tau) = R_{YX}(-\tau),\\ C_{XX}(\tau) = C_{XX}(-\tau),\text{ }& C_{XY}(\tau) = C_{YX}(-\tau).\end{align*}
+	\end{itemize}
+
+	        It follows then that $R_{XX}(\tau)$ and $C_{XX}(\tau)$ have real, even Fourier transforms at all frequencies. We will soon see the transforms are nonnegative.
+
+	\begin{itemize}
+		\item \emph{Second auto-moments attain max at $\tau = 0$:}
+			\begin{align*} -C_{XX}(0) & \leq C_{XX}(\tau) \leq C_{XX}(0)\\
+		2\mu_X^2-R_{XX}(0) & \leq R_{XX}(\tau) \leq R_{XX}(0)\end{align*}
+	\end{itemize}
+	Follows from the fact that a correlation coefficient's magnitude never exceeds 1.
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+	\frametitle{``ergodicity"}
+	\begin{itemize}
+		\item Time-averages of statistics of ensemble member approach those of the ensemble
+		\item \emph{Ergodic in the mean:} time averages of $X$ converge in squared mean to $\mu_X$, ie
+			\begin{equation*}	
+			\langle X \rangle_T = \frac{1}{2T} \int_{-T}^T X(t) dt \myeq \mu_X
+			\end{equation*}
+		\item Any WSS process with finite variance at each instant and with a covariance function that approaches 0 for large $\tau$ is ergodic in the mean
+		\item EE approach: assume ergodicity unless it's very unreasonable. Then obtain first moment $\mathbb{E}[X(t)] = \frac{1}{2T} \int_{-T}^T x(t) dt$ and autocorrelation $\mathbb{E}[X(t+\tau)X(t)] = \frac{1}{2T} \int_{-T}^T x(t)dt$ on $x$, a realization of $X$, for some large $T$.
+
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{example: random telegraph signal}
+	\begin{itemize}
+		\item Random initial polarity PMF: $X(0) = \pm 1$ w.p. 0.5
+
+		\item Polarity changes at Poisson times: \begin{equation*}
+				\text{P(}k\text{ sign changes in interval of length }T) = \frac{(\lambda T)^k e^{-\lambda T}}{k!}
+		\end{equation*}
+	\item Probability of an even number of sign changes in an interval of length $T$: $\frac{1}{2}(1+e^{-2\lambda T}).$ Probability of an odd number of sign changes: $\frac{1}{2}(1-e^{-2\lambda T})$.
+	\item First moment is stationary: $\mu_X(t) = 0$ because P$(X(t)=+1)  = \frac{1}{2}(1+e^{-2\lambda T})\cdot \frac{1}{2} + \frac{1}{2}(1-e^{-2\lambda T})\cdot\frac{1}{2} = \frac{1}{2}.$
+	%\item $\mathbb{E}[X(t_i)X(t_j)] = $1\cdot P$(X(t_i) = X(t_j)) -1\cdot $P$(X(t_i) \neq X(t_j)) = e^{-2\lambda|t_j-t_i|}$.
+	\item Second moment is stationary: $R_{XX}(\tau) = e^{-2\lambda |\tau|}$ as $\mathbb{E}[X(t_i)X(t_j)] = +1\cdot $P$(X(t_i) = X(t_j)) -1\cdot $P$(X(t_i) \neq X(t_j)) = e^{-2\lambda|t_j-t_i|}$.
+	\end{itemize}
+	\vspace{-0.4cm}
+	\begin{figure}
+		\centering
+	\begin{tikzpicture}
+		\draw[title] (0,0) --(1,0)|- ++(rnd,1)
+     		\foreach \x in {1,...,6}{-|++(rnd,-1) -| ++(rnd,1)}
+     		-| ++(rnd,-1);
+		\node at (-0.4, 0) {\textcolor{title}{$-1$}};
+		\node at (-0.4, 1) {\textcolor{title}{$+1$}};
+
+	\end{tikzpicture}
+	%\caption{random telegraph signal}
+	\end{figure}
+
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]
+	\frametitle{passing a wss process through an lti filter}
+	\vspace{-0.5cm}
+	\begin{center}
+		\begin{pspicture}[showgrid = false](0,1)(6,1)
+			\rput (0 ,1){\rnode {x }{ $x[n]$ }}
+			\psblock [linecolor=title, framesize =1 .75](3 ,1){ a }{$h[n]$}
+			\rput (6 ,1){\rnode {y }{ $y[n]$ }}
+	\psset { style = Arrow }
+	\ncline [linecolor=title, nodesepA =.15]{ x }{ a}
+	\ncline [linecolor=title, nodesepB =.15]{ a }{ y}
+	\end{pspicture}
+	\end{center}
+	Recall: for deterministic signals, linear, time-invariant systems are completely characterized by their impulse-response function $h$. $y = h \ast x$.
+	\begin{figure}
+	\centering
+	\begin{pspicture}[showgrid=false](0 , -.5)(3,1)
+	\psset{style=Stem ,stemtag}
+	\psstem[linecolor=red](0,1){1}
+	\psstem[linecolor=magenta](3,1){.8}
+	%\psset{stemhead=o}
+	\psstem[linecolor=blue](1,1){.5}
+	\psstem[linecolor=green](2,1){-.5}
+	\end{pspicture}
+		%\caption{$x[n] =\textcolor{red}{x[0]\delta[n-0]} + \textcolor{blue}{x[1]\delta[n-1]} + \textcolor{green}{x[2]\delta[n-2]} + \textcolor{magenta}{x[3]\delta[n-3]}$.}
+	\end{figure}
+	$x[n] = \textcolor{red}{x[0]\delta[n-0]} + \textcolor{blue}{x[1]\delta[n-1]} + \textcolor{green}{x[2]\delta[n-2]} + \textcolor{magenta}{x[3]\delta[n-3]}$
+	\vspace{0.2cm}
+
+	If $x$ is the \textcolor{green}{sum} of \textcolor{green}{scaled} and \textcolor{magenta}{shifted} lollipops, and $h$ is an \textcolor{green}{L}\textcolor{magenta}{TI} system, then $y$ is the \textcolor{green}{sum} of \textcolor{green}{scaled} and \textcolor{magenta}{shifted} \emph{responses} to the unit lollipop.\footnote{\tiny The basic convolution relation holds for a wide class of practical functions, for instance, when $x$ is bounded and $h$ is absolutely summable/integrable.}
+
+	\vspace{0.2cm}
+
+	$y[n] = \textcolor{red}{x[0]h[n-0]} + \textcolor{blue}{x[1]h[n-1]} + \textcolor{green}{x[2]h[n-2]} + \textcolor{magenta}{x[3]h[n-3]}$
+% x is bounded, h is BIBO stable ie absolutely summable/integrable
+\end{frame}
+
+\begin{frame}[fragile]
+        \frametitle{passing a wss process through an lti filter}
+	\textrm{Preserves wise-sense stationarity! $Y$ is jointly WSS with $X$.}
+
+	\begin{align*} \mathbb{E}[y(t)] &= \mathbb{E}\bigg[\int_{-\infty}^{\infty}h(v)x(t-v)dv\bigg]\\
+		&= \int_{-\infty}^{\infty}h(v)\mathbb{E}[x(t-v)]dv\footnotemark\\ %\text{\footnote{\tiny Electrical engineers to mathematicians' quibbles: \includegraphics[width=0.1\textwidth]{neerd.png}}}\\
+		&= \mu_X \int_{-\infty}^{\infty}h(v)dv =  H(j0)\mu_X,
+	\end{align*} which does not depend on the time $t$.
+	\footnotetext{\tiny Electrical engineers to mathematicians' quibbles: \includegraphics[width=0.1\textwidth]{neerd.png}\\
+	When working with WSS processes we generally do not require that every function in the random signal ensemble of the input $X$ need be bounded, merely that $R_{XX}(\tau)$ be bounded, but with care this result can apply to nonbounded inputs (e.g., continuous white noise, where $R_{XX}(\tau) = \delta(\tau)$ and non-BIBO systems, such as the ideal LPF, when the frequency response function is well-defined.}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+	\frametitle{passing a wss process through an lti filter}
+	\textrm{Deterministic relationship between autocorrelation of input and cross-correlation of output and input:}
+	\begin{center}
+            	\begin{pspicture}[showgrid = false](0,1)(6,1)
+			\rput (0 ,1){\rnode {x }{ $R_{XX}(\tau)$ }}
+			\psblock [linecolor=title, framesize =1 .75](3 ,1){ a }{$h(\tau)$}
+			\rput (6 ,1){\rnode {y }{ $R_{YX}(\tau)$ }}
+        		\psset { style = Arrow }
+        		\ncline [linecolor=title, nodesepA =.15]{ x }{ a}
+        		\ncline [linecolor=title, nodesepB =.15]{ a }{ y}
+        	\end{pspicture}
+        \end{center}
+	\begin{align*}R_{YX}(\tau) = \mathbb{E}[y(t+\tau)x(t)] &= \mathbb{E}\bigg[\int_{-\infty}^{\infty} \big(h(v)x(t+\tau-v)\big)x(v)dv\bigg]\\
+		&= \int_{-\infty}^{\infty} h(v) \mathbb{E}[x(t+\tau-v)x(v)]dv\\
+		&= \int{-\infty}^{\infty} h(v) R_{XX}(\tau-v) dv\\
+		&= (h \ast R_{xx})(\tau).
+	\end{align*}
+
+	Noting that $R_{XY}(\tau) = R_{YX}(-\tau) =  h(-\tau) \ast R_{XX}(-\tau) = R_{XX}(\tau) \ast h(-\tau)$, we can conclude further that:
+	\begin{equation}
+		R_{YY}(\tau) = h(-\tau) \ast h(\tau) \ast R_{XX}(\tau)
+	\end{equation}
+
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{passing a wss signal through an lti filter}
+	\textrm{Putting it together:}
+        \begin{center}
+                \begin{pspicture}[showgrid = false](0,1)(6,1)
+                        \rput (0 ,1){\rnode {x }{ $R_{XX}(\tau)$ }}
+                        \psblock [linecolor=title, framesize =1 .75](3 ,1){ a }{$h(-\tau)$}
+                        \rput (6 ,1){\rnode {y }{ $R_{XY}(\tau)$ }}
+                        \psset { style = Arrow }
+                        \ncline [linecolor=title, nodesepA =.15]{ x }{ a}
+                        \ncline [linecolor=title, nodesepB =.15]{ a }{ y}
+                \end{pspicture}
+        \end{center}
+
+	        \begin{center}
+                \begin{pspicture}[showgrid = false](0,1)(6,1)
+                        \rput (0 ,1){\rnode {x }{ $R_{XY}(\tau)$ }}
+                        \psblock [linecolor=title, framesize =1 .75](3 ,1){ a }{$h(\tau)$}
+                        \rput (6 ,1){\rnode {y }{ $R_{YY}(\tau)$ }}
+                        \psset { style = Arrow }
+                        \ncline [linecolor=title, nodesepA =.15]{ x }{ a}
+                        \ncline [linecolor=title, nodesepB =.15]{ a }{ y}
+                \end{pspicture}
+        \end{center}
+
+	\textrm{Define the deterministic autocorrelation function: $\overline{R_{hh}}(\tau) = h(\tau) \ast h(-\tau)$.}
+                \begin{center}
+                \begin{pspicture}[showgrid = false](0,1)(6,1)
+                        \rput (0 ,1){\rnode {x }{ $R_{XX}(\tau)$ }}
+			\psblock [linecolor=title, framesize =1 .75](3 ,1){ a }{$\overline{R_{hh}}(\tau)$}
+                        \rput (6 ,1){\rnode {y }{ $R_{YY}(\tau)$ }}
+                        \psset { style = Arrow }
+                        \ncline [linecolor=title, nodesepA =.15]{ x }{ a}
+                        \ncline [linecolor=title, nodesepB =.15]{ a }{ y}
+                \end{pspicture}
+        \end{center}
+
+	\textrm{In the frequency domain:}
+	\begin{align*}
+		S_{YX}(j\omega)=S_{XX}(j\omega)H(j\omega) &\text{ } S_{XY}(j\omega) = S_{XX}(j\omega)H^*(j\omega)\\
+		S_{YY}(j\omega)=S_{YX}(j\omega)H^*(j\omega) &\text{ } S_{YY}(j\omega) = S_{XX}(j\omega)|H(j\omega)|^2.
+	\end{align*}
+	
+
+	where $S_{XX}(j\omega)$ be the Fourier transform of $R_{XX}(\tau)$ and so forth.
+
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+    \frametitle{the fourier transform of a random signal: cleaning up the mess}
+        \begin{center}
+        \includegraphics[width = 0.5\textwidth]{NancyLazyCleanup.png}
+        \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+        \frametitle{california history (as taught in france)}
+\begin{center}
+\textrm{California became its own state in 1850 so that marijuana-legalization advocates could define an idiotic marijuana culture and slowly build momentum for the 2016 legalization of the (then-legal) substance.}
+\end{center}
+\vspace{0.1cm}
+\begin{center}
+\includegraphics[width = 0.5\textwidth]{arnold.jpg}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+        \frametitle{but california is so much more}
+\begin{center}
+\end{center}
+\vspace{0.1cm}
+\begin{center}
+\includegraphics[width = 0.5\textwidth]{arnold.jpg}
+\end{center}
+\end{frame}
+
+
+
+
+
+
+\iffalse
+\begin{lstlisting}
+def list_of_vectors(n,T):
+return [matlib.zeros((n,1)) for t in T]
+\end{lstlisting}
+\textsf{Here is an equation:}
+	\textrm{Here is aneq uation}
+	\texttt{Heri sanequa ti on}
+\begin{equation}
+x_t = Ax_{t-1} + w_t
+\end{equation}
+\end{frame}
+\fi
+\end{document}
+
